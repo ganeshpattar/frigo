@@ -1,0 +1,30 @@
+{
+  "name": "frigo-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "gateway",
+    "services/*"
+  ],
+  "scripts": {
+    "db:setup": "node scripts/setup-postgres.js",
+    "db:migrate": "npm run migrate -w @frigo/auth-service && npm run migrate -w @frigo/user-service && npm run migrate -w @frigo/platform-service",
+    "db:seed": "npm run seed -w @frigo/auth-service",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "dev": "concurrently -k -n user,auth,platform,gateway -c blue,green,magenta,cyan \"npm run dev:user\" \"npm run dev:auth\" \"npm run dev:platform\" \"npm run dev:gateway\"",
+    "dev:auth": "npm run dev -w @frigo/auth-service",
+    "dev:user": "npm run dev -w @frigo/user-service",
+    "dev:platform": "npm run dev -w @frigo/platform-service",
+    "dev:gateway": "npm run dev -w @frigo/gateway",
+    "seed:auth": "npm run seed -w @frigo/auth-service",
+    "seed:platform": "npm run seed -w @frigo/platform-service"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}

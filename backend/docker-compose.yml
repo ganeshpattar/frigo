@@ -1,0 +1,25 @@
+# Optional Docker Postgres — single database `frigo`
+version: "3.9"
+
+services:
+  frigo-db:
+    image: postgres:16-alpine
+    container_name: frigo-db
+    environment:
+      POSTGRES_DB: frigo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - frigo_db_data:/var/lib/postgresql/data
+      - ./services/auth-service/sql/001_init.sql:/docker-entrypoint-initdb.d/001_auth.sql:ro
+      - ./services/user-service/sql/001_init.sql:/docker-entrypoint-initdb.d/002_user.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d frigo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  frigo_db_data:

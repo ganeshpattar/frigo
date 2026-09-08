@@ -1,0 +1,102 @@
+# Frigo backend — Render Blueprint
+# Repo root: Frigo/  |  Backend code: backend/
+# Connect this repo in Render → New → Blueprint → select render.yaml
+
+services:
+  # ── Auth service (deploy first) ─────────────────────────────────────
+  - type: web
+    name: frigo-auth
+    runtime: node
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    preDeployCommand: npm run migrate -w @frigo/auth-service
+    startCommand: npm run start -w @frigo/auth-service
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: USER_SERVICE_URL
+        fromService:
+          type: web
+          name: frigo-user
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: EXPOSE_DEMO_RESET_CODE
+        value: "false"
+      - key: BCRYPT_ROUNDS
+        value: "12"
+
+  # ── User service ──────────────────────────────────────────────────
+  - type: web
+    name: frigo-user
+    runtime: node
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    preDeployCommand: npm run migrate -w @frigo/user-service
+    startCommand: npm run start -w @frigo/user-service
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        sync: false
+
+  # ── Platform service ──────────────────────────────────────────────
+  - type: web
+    name: frigo-platform
+    runtime: node
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    preDeployCommand: npm run migrate -w @frigo/platform-service
+    startCommand: npm run start -w @frigo/platform-service
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        fromService:
+          type: web
+          name: frigo-auth
+          envVarKey: JWT_ACCESS_SECRET
+
+  # ── API Gateway (public entry point) ──────────────────────────────
+  - type: web
+    name: frigo-gateway
+    runtime: node
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm run start -w @frigo/gateway
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: AUTH_SERVICE_URL
+        fromService:
+          type: web
+          name: frigo-auth
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: USER_SERVICE_URL
+        fromService:
+          type: web
+          name: frigo-user
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: PLATFORM_SERVICE_URL
+        fromService:
+          type: web
+          name: frigo-platform
+          envVarKey: RENDER_EXTERNAL_URL

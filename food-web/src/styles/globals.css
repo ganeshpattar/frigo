@@ -1,0 +1,161 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Brand: Sky Blue primary scale */
+  --color-brand-50: #e6f6ff;
+  --color-brand-100: #cceeff;
+  --color-brand-200: #99dcff;
+  --color-brand-300: #5ec8f7;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-800: #0b2545;
+  --color-brand-900: #082038;
+
+  --color-accent-400: #38bdf8;
+  --color-accent-500: #0ea5e9;
+  --color-accent-600: #0284c7;
+
+  --color-surface: #e6f6ff;
+  --color-surface-elevated: #ffffff;
+  --color-canvas: #f4f8fc;
+  --color-ink: #0b2545;
+  --color-ink-muted: #94a3b8;
+  --color-border: #c5e4f5;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+}
+
+.dark {
+  --color-surface: #071526;
+  --color-surface-elevated: #0b2545;
+  --color-canvas: #071526;
+  --color-ink: #e6f6ff;
+  --color-ink-muted: #94a3b8;
+  --color-border: #1e3a5f;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth antialiased;
+    font-size: 16px;
+  }
+
+  body {
+    @apply bg-transparent font-sans text-base leading-normal text-ink;
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .bg-canvas {
+    background-color: var(--color-canvas);
+  }
+
+  .bg-hero-grid {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(14 165 233 / 0.28), transparent),
+      linear-gradient(to bottom, transparent, var(--color-surface));
+  }
+
+  .dark .bg-hero-grid {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(14 165 233 / 0.35), transparent),
+      linear-gradient(to bottom, transparent, var(--color-surface));
+  }
+
+  .hero-scrim {
+    background:
+      linear-gradient(105deg, rgb(11 37 69 / 0.88) 0%, rgb(11 37 69 / 0.55) 42%, rgb(11 37 69 / 0.18) 100%),
+      linear-gradient(to top, rgb(11 37 69 / 0.55), transparent 45%);
+  }
+
+  .dark .hero-scrim {
+    background:
+      linear-gradient(105deg, rgb(7 21 38 / 0.92) 0%, rgb(7 21 38 / 0.62) 45%, rgb(7 21 38 / 0.28) 100%),
+      linear-gradient(to top, rgb(7 21 38 / 0.65), transparent 45%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .mask-fade-r {
+    mask-image: linear-gradient(to right, black 85%, transparent);
+  }
+
+  .animate-ken-burns {
+    animation: ken-burns 22s ease-in-out infinite alternate;
+  }
+
+  .animate-float-soft {
+    animation: float-soft 7s ease-in-out infinite;
+  }
+
+  /* Soft brand wash so the food background stays visible but content stays readable */
+  .bg-site-wash {
+    background:
+      linear-gradient(
+        180deg,
+        rgb(230 246 255 / 0.78) 0%,
+        rgb(230 246 255 / 0.88) 45%,
+        rgb(230 246 255 / 0.92) 100%
+      ),
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(14 165 233 / 0.18), transparent 60%);
+  }
+
+  .dark .bg-site-wash {
+    background:
+      linear-gradient(
+        180deg,
+        rgb(7 21 38 / 0.82) 0%,
+        rgb(7 21 38 / 0.9) 50%,
+        rgb(7 21 38 / 0.94) 100%
+      ),
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(14 165 233 / 0.2), transparent 60%);
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+  }
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}

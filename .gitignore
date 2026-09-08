@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Build / cache
+dist/
+build/
+.data/
+*.log
+npm-debug.log*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Test / coverage
+coverage/
+
+# Mobile
+Mobile-app/app/android/.gradle/
+Mobile-app/app/android/app/build/
+Mobile-app/app/ios/Pods/
