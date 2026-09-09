@@ -1,0 +1,5 @@
+# SPA fallback — refresh on /admin, /orders, etc. must serve index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

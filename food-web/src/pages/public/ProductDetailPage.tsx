@@ -56,7 +56,7 @@ export function ProductDetailPage() {
         <motion.div
           variants={fadeUp}
           transition={tweenOut}
-          className="overflow-hidden rounded-[2rem] border border-border/80 bg-surface-elevated shadow-[0_24px_60px_-36px_rgb(14_165_233/0.45)]"
+          className="overflow-hidden rounded-[2rem] border border-border/80 bg-surface-elevated shadow-[0_24px_60px_-36px_rgb(144_0_0/0.4)]"
         >
           <ProductImage src={image?.url} alt={image?.altText ?? product.name} aspect="square" />
         </motion.div>

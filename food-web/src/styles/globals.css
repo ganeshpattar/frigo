@@ -6,40 +6,40 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Brand: Sky Blue primary scale */
-  --color-brand-50: #e6f6ff;
-  --color-brand-100: #cceeff;
-  --color-brand-200: #99dcff;
-  --color-brand-300: #5ec8f7;
-  --color-brand-400: #38bdf8;
-  --color-brand-500: #0ea5e9;
-  --color-brand-600: #0284c7;
-  --color-brand-700: #0369a1;
-  --color-brand-800: #0b2545;
-  --color-brand-900: #082038;
+  /* Brand: Tirumala maroon / crimson from logo */
+  --color-brand-50: #fdf2f2;
+  --color-brand-100: #fce4e4;
+  --color-brand-200: #f5c2c2;
+  --color-brand-300: #eb8a8a;
+  --color-brand-400: #e84545;
+  --color-brand-500: #c81010;
+  --color-brand-600: #900000;
+  --color-brand-700: #780000;
+  --color-brand-800: #5c0a0a;
+  --color-brand-900: #3d0808;
 
-  --color-accent-400: #38bdf8;
-  --color-accent-500: #0ea5e9;
-  --color-accent-600: #0284c7;
+  --color-accent-400: #f00808;
+  --color-accent-500: #e80808;
+  --color-accent-600: #c81010;
 
-  --color-surface: #e6f6ff;
+  --color-surface: #fdf5f4;
   --color-surface-elevated: #ffffff;
-  --color-canvas: #f4f8fc;
-  --color-ink: #0b2545;
-  --color-ink-muted: #94a3b8;
-  --color-border: #c5e4f5;
+  --color-canvas: #faf6f5;
+  --color-ink: #2a0a0a;
+  --color-ink-muted: #6f5555;
+  --color-border: #edd5d5;
   --color-danger: #ef4444;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
 }
 
 .dark {
-  --color-surface: #071526;
-  --color-surface-elevated: #0b2545;
-  --color-canvas: #071526;
-  --color-ink: #e6f6ff;
-  --color-ink-muted: #94a3b8;
-  --color-border: #1e3a5f;
+  --color-surface: #1a0808;
+  --color-surface-elevated: #2a0c0c;
+  --color-canvas: #140606;
+  --color-ink: #fdf2f2;
+  --color-ink-muted: #c9a8a8;
+  --color-border: #4a2020;
 }
 
 @layer base {
@@ -79,26 +79,26 @@
 
   .bg-hero-grid {
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(14 165 233 / 0.28), transparent),
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(144 0 0 / 0.22), transparent),
       linear-gradient(to bottom, transparent, var(--color-surface));
   }
 
   .dark .bg-hero-grid {
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(14 165 233 / 0.35), transparent),
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(200 16 16 / 0.3), transparent),
       linear-gradient(to bottom, transparent, var(--color-surface));
   }
 
   .hero-scrim {
     background:
-      linear-gradient(105deg, rgb(11 37 69 / 0.88) 0%, rgb(11 37 69 / 0.55) 42%, rgb(11 37 69 / 0.18) 100%),
-      linear-gradient(to top, rgb(11 37 69 / 0.55), transparent 45%);
+      linear-gradient(105deg, rgb(61 8 8 / 0.88) 0%, rgb(92 10 10 / 0.55) 42%, rgb(92 10 10 / 0.18) 100%),
+      linear-gradient(to top, rgb(61 8 8 / 0.55), transparent 45%);
   }
 
   .dark .hero-scrim {
     background:
-      linear-gradient(105deg, rgb(7 21 38 / 0.92) 0%, rgb(7 21 38 / 0.62) 45%, rgb(7 21 38 / 0.28) 100%),
-      linear-gradient(to top, rgb(7 21 38 / 0.65), transparent 45%);
+      linear-gradient(105deg, rgb(20 6 6 / 0.92) 0%, rgb(26 8 8 / 0.62) 45%, rgb(26 8 8 / 0.28) 100%),
+      linear-gradient(to top, rgb(20 6 6 / 0.65), transparent 45%);
   }
 
   .text-balance {
@@ -122,22 +122,22 @@
     background:
       linear-gradient(
         180deg,
-        rgb(230 246 255 / 0.78) 0%,
-        rgb(230 246 255 / 0.88) 45%,
-        rgb(230 246 255 / 0.92) 100%
+        rgb(253 242 242 / 0.78) 0%,
+        rgb(253 242 242 / 0.88) 45%,
+        rgb(253 242 242 / 0.92) 100%
       ),
-      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(14 165 233 / 0.18), transparent 60%);
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(144 0 0 / 0.14), transparent 60%);
   }
 
   .dark .bg-site-wash {
     background:
       linear-gradient(
         180deg,
-        rgb(7 21 38 / 0.82) 0%,
-        rgb(7 21 38 / 0.9) 50%,
-        rgb(7 21 38 / 0.94) 100%
+        rgb(20 6 6 / 0.82) 0%,
+        rgb(20 6 6 / 0.9) 50%,
+        rgb(20 6 6 / 0.94) 100%
       ),
-      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(14 165 233 / 0.2), transparent 60%);
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgb(200 16 16 / 0.2), transparent 60%);
   }
 }
 

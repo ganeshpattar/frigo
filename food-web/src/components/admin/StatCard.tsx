@@ -35,7 +35,7 @@ export function StatCard({ label, value, icon, tone = 'brand' }: StatCardProps) 
   return (
     <div
       className={cn(
-        'rounded-xl border px-5 py-4 shadow-[0_1px_2px_rgb(11_37_69/0.04)]',
+        'rounded-xl border px-5 py-4 shadow-[0_1px_2px_rgb(61_8_8/0.04)]',
         cardStyles[tone],
       )}
     >

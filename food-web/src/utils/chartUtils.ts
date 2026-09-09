@@ -2,7 +2,7 @@ import type { OrderStatus } from '@/types'
 
 const STATUS_CHART_COLORS: Record<OrderStatus, string> = {
   PENDING: '#F59E0B',
-  CONFIRMED: '#0EA5E9',
+  CONFIRMED: '#900000',
   PREPARING: '#6366F1',
   READY: '#22C55E',
   OUT_FOR_DELIVERY: '#06B6D4',

@@ -27,7 +27,7 @@ export function CartPage() {
     <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(ellipse_at_top,rgb(14_165_233/0.14),transparent_60%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(ellipse_at_top,rgb(144_0_0/0.12),transparent_60%)]"
       />
 
       <Breadcrumb items={[{ label: 'Home', to: ROUTES.HOME }, { label: 'Cart' }]} />
@@ -72,7 +72,7 @@ export function CartPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={tweenOut}
-            className="overflow-hidden rounded-[2rem] border border-border/80 bg-surface-elevated px-6 py-16 text-center shadow-[0_24px_60px_-40px_rgb(14_165_233/0.45)]"
+            className="overflow-hidden rounded-[2rem] border border-border/80 bg-surface-elevated px-6 py-16 text-center shadow-[0_24px_60px_-40px_rgb(144_0_0/0.4)]"
           >
             <motion.div
               className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-50 text-brand-600"
@@ -105,7 +105,7 @@ export function CartPage() {
             <motion.section
               variants={fadeUp}
               transition={tweenOut}
-              className="overflow-hidden rounded-[1.75rem] border border-border/80 bg-surface-elevated shadow-[0_18px_50px_-36px_rgb(11_37_69/0.35)]"
+              className="overflow-hidden rounded-[1.75rem] border border-border/80 bg-surface-elevated shadow-[0_18px_50px_-36px_rgb(61_8_8/0.28)]"
             >
               <div className="border-b border-border/70 px-5 py-4 sm:px-6">
                 <h2 className="font-display text-lg font-semibold text-ink">Items</h2>
@@ -129,7 +129,7 @@ export function CartPage() {
             <motion.aside
               variants={fadeUp}
               transition={tweenOut}
-              className="overflow-hidden rounded-[1.75rem] border border-brand-100 bg-surface-elevated shadow-[0_24px_60px_-34px_rgb(14_165_233/0.55)] lg:sticky lg:top-24"
+              className="overflow-hidden rounded-[1.75rem] border border-brand-100 bg-surface-elevated shadow-[0_24px_60px_-34px_rgb(144_0_0/0.45)] lg:sticky lg:top-24"
             >
               <div className="bg-gradient-to-br from-brand-500 to-brand-700 px-5 py-5 text-white sm:px-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/75">

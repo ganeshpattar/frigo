@@ -15,6 +15,8 @@ export interface SidebarProfileLink {
 interface SidebarProfileProps {
   name?: string
   email?: string
+  /** Role label shown in the profile menu (e.g. Manager / Admin). */
+  roleLabel?: string
   collapsed?: boolean
   theme?: ThemeMode
   onToggleTheme?: () => void
@@ -25,6 +27,7 @@ interface SidebarProfileProps {
 export function SidebarProfile({
   name,
   email,
+  roleLabel,
   collapsed = false,
   theme = 'light',
   onToggleTheme,
@@ -71,6 +74,11 @@ export function SidebarProfile({
           <div className="border-b border-border px-3 py-2">
             <p className="truncate text-sm font-semibold text-ink">{displayName}</p>
             {email ? <p className="truncate text-xs text-ink-muted">{email}</p> : null}
+            {roleLabel ? (
+              <p className="mt-1.5 inline-flex rounded-md bg-brand-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-700 ring-1 ring-brand-100">
+                {roleLabel}
+              </p>
+            ) : null}
           </div>
           {onToggleTheme ? (
             <button
@@ -127,6 +135,11 @@ export function SidebarProfile({
             <div className="min-w-0 flex-1 text-left">
               <p className="truncate text-sm font-semibold text-ink">{displayName}</p>
               {email ? <p className="truncate text-xs text-ink-muted">{email}</p> : null}
+              {roleLabel ? (
+                <p className="mt-0.5 truncate text-[11px] font-semibold uppercase tracking-wide text-brand-600">
+                  {roleLabel}
+                </p>
+              ) : null}
             </div>
             <ChevronUp
               className={cn('h-4 w-4 shrink-0 text-ink-muted transition-transform', open && 'rotate-180')}

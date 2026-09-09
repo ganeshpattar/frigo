@@ -35,7 +35,7 @@ export function TrendChart({
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
   const areaPath = `${linePath} L ${points[points.length - 1]?.x ?? 100} 100 L ${points[0]?.x ?? 0} 100 Z`
 
-  const stroke = tone === 'brand' ? '#0EA5E9' : '#22C55E'
+  const stroke = tone === 'brand' ? '#900000' : '#22C55E'
   const fill = tone === 'brand' ? 'rgba(14,165,233,0.12)' : 'rgba(34,197,94,0.12)'
 
   return (

@@ -3,9 +3,9 @@ import { Mail, MapPin, Phone } from 'lucide-react'
 import { ROUTES } from '@/constants'
 import { BrandLogo } from '@/components/brand/BrandLogo'
 
-const COMPANY_ADDRESS = 'Frigo Foods, Gokul Road, Hubballi, Karnataka 580030, India'
-const SUPPORT_EMAIL = 'frigosupport@gmail.com'
-const SUPPORT_PHONE = '8904633113'
+const COMPANY_ADDRESS = 'Tirumala Foods, Prop  S S Reddy, Plot no 177, KA I DB, near diamond collage, Naubad, Bidar 585402'
+const SUPPORT_EMAIL = 'support@tirumalfoods.com'
+const SUPPORT_PHONE = '+91 9880757318'
 
 export function Footer() {
   return (
@@ -61,7 +61,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <p className="mx-auto max-w-7xl px-4 py-4 text-xs text-white/50 sm:px-6">
-          © {new Date().getFullYear()} Frigo. Browse as a guest — secure checkout when you are ready.
+          © {new Date().getFullYear()} Tirumal Foods. Browse as a guest — secure checkout when you are ready.
         </p>
       </div>
     </footer>

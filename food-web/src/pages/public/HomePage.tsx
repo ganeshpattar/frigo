@@ -50,26 +50,26 @@ export function HomePage() {
   return (
     <div>
       {/* Full-bleed hero — brand, headline, support, CTAs only */}
-      <section className="relative isolate min-h-[min(92vh,860px)] overflow-hidden">
+      <section className="relative isolate min-h-[min(72vh,640px)] overflow-hidden sm:min-h-[min(78vh,720px)]">
         <div className="absolute inset-0">
           <img
             src={heroImage}
             alt=""
             aria-hidden
-            className={`h-full w-full object-cover ${reduceMotion ? '' : 'animate-ken-burns'}`}
+            className={`h-full w-full object-cover object-center ${reduceMotion ? '' : 'animate-ken-burns'}`}
           />
           <div className="hero-scrim absolute inset-0" />
         </div>
 
-        <div className="relative z-10 mx-auto flex min-h-[min(92vh,860px)] max-w-7xl flex-col justify-end px-4 pb-16 pt-28 sm:px-6 sm:pb-20 lg:justify-center lg:pb-24">
+        <div className="relative z-10 mx-auto flex min-h-[min(72vh,640px)] max-w-7xl flex-col justify-end px-4 pb-12 pt-24 sm:min-h-[min(78vh,720px)] sm:px-6 sm:pb-16 sm:pt-28 lg:justify-center lg:pb-20">
           <motion.div
             className="max-w-xl"
             initial={reduceMotion ? false : 'hidden'}
             animate="visible"
             variants={staggerContainer}
           >
-            <motion.div variants={fadeUp} transition={tweenOut} className="mb-6">
-              <BrandLogo size="xl" to={null} variant="onDark" />
+            <motion.div variants={fadeUp} transition={tweenOut} className="mb-5 sm:mb-6">
+              <BrandLogo size="lg" to={null} variant="onDark" />
             </motion.div>
             <motion.h1
               variants={fadeUp}

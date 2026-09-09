@@ -26,9 +26,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       transition={springSoft}
       className={cn(
         'group flex flex-col overflow-hidden rounded-[1.5rem] border border-border/80',
-        'bg-surface-elevated shadow-[0_1px_0_rgb(11_37_69/0.04)]',
+        'bg-surface-elevated shadow-[0_1px_0_rgb(61_8_8/0.04)]',
         'transition-[border-color,box-shadow] duration-300',
-        'hover:border-brand-200 hover:shadow-[0_18px_40px_-24px_rgb(14_165_233/0.55)]',
+        'hover:border-brand-200 hover:shadow-[0_18px_40px_-24px_rgb(144_0_0/0.45)]',
       )}
     >
       <Link to={productPath(product.id)} className="relative block overflow-hidden">

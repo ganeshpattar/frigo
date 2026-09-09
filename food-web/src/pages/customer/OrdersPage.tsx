@@ -1,37 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ArrowRight,
-  ClipboardList,
-  Headphones,
   Package,
   RefreshCw,
   ShoppingBag,
   Sparkles,
   Truck,
-  UtensilsCrossed,
 } from 'lucide-react'
 import { ROUTES } from '@/constants'
-import { Card } from '@/components/common/Card'
 import { AlertModal } from '@/components/common/AlertModal'
 import { Button } from '@/components/common/Button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Skeleton } from '@/components/common/Skeleton'
-import { OrderStatusBadge } from '@/components/data-display/OrderStatusBadge'
+import { Breadcrumb } from '@/components/navigation/Breadcrumb'
 import { CustomerOrderCard } from '@/components/data-display/CustomerOrderCard'
 import { ordersApi } from '@/services/api'
 import type { Order, OrderStatus } from '@/types'
 import { getUserFriendlyMessage } from '@/utils/apiError'
 import { cn } from '@/utils/cn'
-import { formatDateTime, formatInr } from '@/utils/format'
+import { formatInr } from '@/utils/format'
 
 type OrderFilter = 'all' | 'active' | 'delivered' | 'cancelled'
 
-const FILTERS: Array<{ id: OrderFilter; label: string; shortLabel: string }> = [
-  { id: 'all', label: 'All orders', shortLabel: 'All' },
-  { id: 'active', label: 'Active', shortLabel: 'Active' },
-  { id: 'delivered', label: 'Delivered', shortLabel: 'Delivered' },
-  { id: 'cancelled', label: 'Cancelled', shortLabel: 'Cancelled' },
+const FILTERS: Array<{ id: OrderFilter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'active', label: 'Active' },
+  { id: 'delivered', label: 'Delivered' },
+  { id: 'cancelled', label: 'Cancelled' },
 ]
 
 function isActiveStatus(status: OrderStatus) {
@@ -47,183 +42,16 @@ function matchesFilter(order: Order, filter: OrderFilter) {
 
 function OrderCardSkeleton() {
   return (
-    <Card padding={false} className="overflow-hidden">
-      <div className="border-b border-border/60 px-4 py-4 sm:px-6">
-        <div className="flex justify-between gap-3">
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-28" />
-            <Skeleton className="h-4 w-40" />
-          </div>
-          <Skeleton className="h-6 w-20 rounded-full" />
+    <div className="overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated/75 p-5 shadow-sm backdrop-blur-sm">
+      <div className="flex justify-between gap-3">
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-6 w-28" />
+          <Skeleton className="h-4 w-40" />
         </div>
-        <Skeleton className="mt-4 h-10 w-full" />
+        <Skeleton className="h-6 w-20 rounded-full" />
       </div>
-      <div className="space-y-2 px-4 py-4 sm:px-6">
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="mt-2 h-10 w-32" />
-      </div>
-    </Card>
-  )
-}
-
-interface OrdersSidebarProps {
-  filter: OrderFilter
-  filterCounts: Record<OrderFilter, number>
-  onFilterChange: (filter: OrderFilter) => void
-  stats: { total: number; active: number; delivered: number; totalSpent: number }
-  variant: 'mobile' | 'desktop'
-}
-
-function OrdersFilterPanel({ filter, filterCounts, onFilterChange, stats, variant }: OrdersSidebarProps) {
-  const isMobile = variant === 'mobile'
-
-  return (
-    <div className={cn(isMobile ? 'space-y-0' : 'space-y-5')}>
-      {!isMobile ? (
-        <Card className="bg-gradient-to-br from-brand-50/50 to-surface-elevated">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Your summary</p>
-          <div className="mt-3 space-y-3">
-            {[
-              { label: 'Total orders', value: String(stats.total), icon: Package },
-              { label: 'Active now', value: String(stats.active), icon: Truck },
-              { label: 'Delivered', value: String(stats.delivered), icon: Sparkles },
-              { label: 'Total spent', value: formatInr(stats.totalSpent), icon: ShoppingBag },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-sm text-ink-muted">
-                  <stat.icon className="h-4 w-4 text-brand-600" />
-                  {stat.label}
-                </div>
-                <span className="text-sm font-semibold tabular-nums text-ink">{stat.value}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      ) : null}
-
-      <div className={cn(!isMobile && 'space-y-2')}>
-        {!isMobile ? (
-          <p className="px-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">Filter orders</p>
-        ) : null}
-        <div
-          className={cn(
-            isMobile
-              ? 'flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-              : 'space-y-1.5',
-          )}
-        >
-          {FILTERS.map((tab) => {
-            const count = filterCounts[tab.id]
-            const active = filter === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => onFilterChange(tab.id)}
-                className={cn(
-                  'inline-flex shrink-0 items-center justify-between gap-3 font-semibold transition-colors',
-                  isMobile
-                    ? 'rounded-full px-4 py-2 text-sm'
-                    : 'w-full rounded-xl px-3 py-2.5 text-sm',
-                  active
-                    ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/25'
-                    : isMobile
-                      ? 'bg-surface-elevated text-ink-muted ring-1 ring-border/80'
-                      : 'text-ink-muted hover:bg-brand-50 hover:text-brand-700',
-                )}
-              >
-                <span>{isMobile ? tab.shortLabel : tab.label}</span>
-                <span
-                  className={cn(
-                    'rounded-full px-1.5 py-0.5 text-xs tabular-nums',
-                    active ? 'bg-white/20 text-white' : 'bg-canvas text-ink-muted',
-                  )}
-                >
-                  {count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function OrdersRightPanel({
-  activeOrders,
-  onSelectFilter,
-}: {
-  activeOrders: Order[]
-  onSelectFilter: () => void
-}) {
-  return (
-    <div className="space-y-5">
-      <Card>
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <h2 className="text-sm font-semibold text-ink">Active deliveries</h2>
-            <p className="mt-0.5 text-xs text-ink-muted">Orders still in progress</p>
-          </div>
-          <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-700">
-            {activeOrders.length}
-          </span>
-        </div>
-        <div className="mt-4 space-y-2">
-          {activeOrders.length === 0 ? (
-            <p className="text-sm text-ink-muted">No active orders right now.</p>
-          ) : (
-            activeOrders.slice(0, 5).map((order) => (
-              <button
-                key={order.id}
-                type="button"
-                onClick={onSelectFilter}
-                className="flex w-full items-center justify-between gap-3 rounded-xl bg-canvas/80 px-3 py-2.5 text-left ring-1 ring-border/50 transition-colors hover:bg-brand-50/60"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-ink">{order.orderNumber}</p>
-                  <p className="truncate text-xs text-ink-muted">{formatDateTime(order.createdAt)}</p>
-                </div>
-                <OrderStatusBadge status={order.status} />
-              </button>
-            ))
-          )}
-        </div>
-      </Card>
-
-      <Card className="overflow-hidden p-0">
-        <div className="bg-gradient-to-br from-brand-600 to-brand-800 p-5 text-white">
-          <UtensilsCrossed className="h-6 w-6 opacity-90" />
-          <h2 className="mt-3 font-display text-lg font-semibold">Hungry again?</h2>
-          <p className="mt-1 text-sm text-white/80">
-            Browse fresh batches of pickles, chatni, rotti and more.
-          </p>
-          <Link to={ROUTES.PRODUCTS} className="mt-4 inline-block">
-            <Button
-              size="sm"
-              className="border-white/20 bg-white/15 text-white hover:bg-white/25"
-              rightIcon={<ArrowRight className="h-4 w-4" />}
-            >
-              Browse menu
-            </Button>
-          </Link>
-        </div>
-      </Card>
-
-      <Card>
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-            <Headphones className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold text-ink">Need help?</h2>
-            <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-              For order issues or delivery questions, contact support from your profile page.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <Skeleton className="mt-4 h-10 w-full" />
+      <Skeleton className="mt-4 h-16 w-full" />
     </div>
   )
 }
@@ -265,11 +93,6 @@ export function OrdersPage() {
     return { total: orders.length, active, delivered, totalSpent }
   }, [orders])
 
-  const activeOrders = useMemo(
-    () => orders.filter((order) => isActiveStatus(order.status)),
-    [orders],
-  )
-
   const filteredOrders = useMemo(
     () => orders.filter((order) => matchesFilter(order, filter)),
     [orders, filter],
@@ -285,207 +108,155 @@ export function OrdersPage() {
     [orders],
   )
 
-  const useWideCards = filteredOrders.length === 1
-
   return (
-    <div className="min-h-full bg-canvas">
-      <div className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 15% 80%, rgba(255,255,255,0.15) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(255,255,255,0.12) 0%, transparent 40%)',
-          }}
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/90 ring-1 ring-white/20">
-                <ClipboardList className="h-3.5 w-3.5" />
-                Order history
+    <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-10">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(ellipse_at_top,rgb(144_0_0/0.12),transparent_60%)]"
+      />
+
+      <Breadcrumb items={[{ label: 'Home', to: ROUTES.HOME }, { label: 'Orders' }]} />
+
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-600 dark:text-brand-300">
+            Order history
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            My orders
+          </h1>
+          <p className="mt-2 max-w-xl text-ink-muted">
+            Track deliveries, view details, and reorder your favourites.
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => void load(true)}
+          disabled={refreshing || loading}
+          leftIcon={<RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />}
+          className="w-fit bg-surface-elevated/80 backdrop-blur-sm"
+        >
+          Refresh
+        </Button>
+      </div>
+
+      <AlertModal
+        open={Boolean(error)}
+        onClose={() => setError(null)}
+        variant="error"
+        title="Could not load orders"
+        description={error ?? undefined}
+      />
+
+      {!loading && orders.length > 0 ? (
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: 'Total', value: String(stats.total), icon: Package },
+            { label: 'Active', value: String(stats.active), icon: Truck },
+            { label: 'Delivered', value: String(stats.delivered), icon: Sparkles },
+            { label: 'Spent', value: formatInr(stats.totalSpent), icon: ShoppingBag },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-2xl border border-border/70 bg-surface-elevated/70 px-3 py-3 shadow-sm backdrop-blur-sm sm:px-4"
+            >
+              <div className="flex items-center gap-1.5 text-ink-muted">
+                <stat.icon className="h-3.5 w-3.5 text-brand-600 dark:text-brand-300" />
+                <span className="text-[11px] font-semibold uppercase tracking-wide">{stat.label}</span>
               </div>
-              <h1 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                My orders
-              </h1>
-              <p className="mt-2 text-sm text-white/80 sm:text-base">
-                Track deliveries, view order details, and reorder your favourites.
+              <p className="mt-1.5 font-display text-lg font-semibold tabular-nums text-ink sm:text-xl">
+                {stat.value}
               </p>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => void load(true)}
-              disabled={refreshing}
-              leftIcon={<RefreshCw className={cn('h-4 w-4', refreshing && 'animate-spin')} />}
-              className="w-full border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto"
-            >
-              Refresh
-            </Button>
-          </div>
-
-          {!loading && orders.length > 0 ? (
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:mt-8">
-              {[
-                { label: 'Total orders', value: String(stats.total), icon: Package },
-                { label: 'Active now', value: String(stats.active), icon: Truck },
-                { label: 'Delivered', value: String(stats.delivered), icon: Sparkles },
-                { label: 'Total spent', value: formatInr(stats.totalSpent), icon: ShoppingBag },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-xl bg-white/10 px-3 py-3 ring-1 ring-white/15 backdrop-blur-sm sm:px-4"
-                >
-                  <div className="flex items-center gap-1.5 text-white/70 sm:gap-2">
-                    <stat.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="text-[10px] font-medium uppercase tracking-wide sm:text-xs">
-                      {stat.label}
-                    </span>
-                  </div>
-                  <p className="mt-1 font-display text-lg font-semibold tabular-nums text-white sm:text-xl">
-                    {stat.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
+          ))}
         </div>
-      </div>
+      ) : null}
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-        <AlertModal
-          open={Boolean(error)}
-          onClose={() => setError(null)}
-          variant="error"
-          title="Could not load orders"
-          description={error ?? undefined}
-        />
-
-        {loading ? (
-          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[280px_minmax(0,1fr)_300px]">
-            <div className="hidden xl:block">
-              <Skeleton className="h-64 w-full" />
-            </div>
-            <div className="space-y-4 lg:col-span-2 xl:col-span-1">
-              <OrderCardSkeleton />
-              <OrderCardSkeleton />
-            </div>
-            <div className="hidden xl:block">
-              <Skeleton className="h-72 w-full" />
-            </div>
-          </div>
-        ) : null}
-
-        {!loading && !orders.length ? (
-          <Card className="overflow-hidden">
-            <EmptyState
-              title="No orders yet"
-              description="When you place an order, it will appear here with live tracking and full details."
-              icon={<ShoppingBag className="h-7 w-7" />}
-              actionLabel="Browse menu"
-              onAction={() => navigate(ROUTES.PRODUCTS)}
-            />
-            <div className="border-t border-border/60 px-6 pb-6 text-center">
-              <Link
-                to={ROUTES.PRODUCTS}
-                className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+      {!loading && orders.length > 0 ? (
+        <div className="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Filter orders">
+          {FILTERS.map((tab) => {
+            const active = filter === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setFilter(tab.id)}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+                  active
+                    ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/25 dark:bg-brand-500'
+                    : 'bg-surface-elevated/80 text-ink-muted ring-1 ring-border backdrop-blur-sm hover:text-ink dark:hover:bg-brand-900/40',
+                )}
               >
-                Explore our menu →
-              </Link>
-            </div>
-          </Card>
-        ) : null}
-
-        {!loading && orders.length > 0 ? (
-          <div className="space-y-5 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_300px] xl:gap-8">
-            <aside className="hidden xl:block">
-              <div className="sticky top-24">
-                <OrdersFilterPanel
-                  variant="desktop"
-                  filter={filter}
-                  filterCounts={filterCounts}
-                  onFilterChange={setFilter}
-                  stats={stats}
-                />
-              </div>
-            </aside>
-
-            <main className="min-w-0 space-y-5">
-              <div className="xl:hidden">
-                <OrdersFilterPanel
-                  variant="mobile"
-                  filter={filter}
-                  filterCounts={filterCounts}
-                  onFilterChange={setFilter}
-                  stats={stats}
-                />
-              </div>
-
-              <div className="hidden items-center justify-between gap-3 lg:flex xl:hidden">
-                <div>
-                  <h2 className="font-display text-xl font-semibold text-ink">
-                    {FILTERS.find((f) => f.id === filter)?.label}
-                  </h2>
-                  <p className="text-sm text-ink-muted">
-                    Showing {filteredOrders.length} of {orders.length} orders
-                  </p>
-                </div>
-              </div>
-
-              {filteredOrders.length === 0 ? (
-                <Card>
-                  <EmptyState
-                    title="No orders in this view"
-                    description="Try another filter or place a new order from the menu."
-                    icon={<Package className="h-7 w-7" />}
-                  />
-                </Card>
-              ) : (
-                <div
+                {tab.label}
+                <span
                   className={cn(
-                    'grid gap-5',
-                    useWideCards ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2',
+                    'rounded-full px-1.5 py-0.5 text-xs tabular-nums',
+                    active ? 'bg-white/20 text-white' : 'bg-canvas/80 text-ink-muted',
                   )}
                 >
-                  {filteredOrders.map((order) => (
-                    <div
-                      key={order.id}
-                      className={cn(
-                        'min-w-0',
-                        expandedOrderId === order.id && !useWideCards && 'lg:col-span-2',
-                      )}
-                    >
-                      <CustomerOrderCard
-                        order={order}
-                        layout={useWideCards || expandedOrderId === order.id ? 'wide' : 'stacked'}
-                        expanded={expandedOrderId === order.id}
-                        onExpandedChange={(expanded) =>
-                          setExpandedOrderId(expanded ? order.id : null)
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </main>
+                  {filterCounts[tab.id]}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
 
-            <aside className="hidden xl:block">
-              <div className="sticky top-24">
-                <OrdersRightPanel
-                  activeOrders={activeOrders}
-                  onSelectFilter={() => setFilter('active')}
-                />
-              </div>
-            </aside>
+      {loading ? (
+        <div className="space-y-4">
+          <OrderCardSkeleton />
+          <OrderCardSkeleton />
+        </div>
+      ) : null}
 
-            <div className="space-y-5 xl:hidden">
-              <OrdersRightPanel
-                activeOrders={activeOrders}
-                onSelectFilter={() => setFilter('active')}
-              />
-            </div>
-          </div>
-        ) : null}
-      </div>
+      {!loading && !orders.length ? (
+        <div className="overflow-hidden rounded-[2rem] border border-border/80 bg-surface-elevated/80 px-6 py-16 text-center shadow-[0_24px_60px_-40px_rgb(144_0_0/0.35)] backdrop-blur-sm">
+          <EmptyState
+            title="No orders yet"
+            description="When you place an order, it will show up here with live tracking and full details."
+            icon={<ShoppingBag className="h-7 w-7" />}
+            actionLabel="Browse menu"
+            onAction={() => navigate(ROUTES.PRODUCTS)}
+          />
+        </div>
+      ) : null}
+
+      {!loading && orders.length > 0 && filteredOrders.length === 0 ? (
+        <div className="rounded-2xl border border-border/70 bg-surface-elevated/75 px-6 py-12 text-center backdrop-blur-sm">
+          <EmptyState
+            title="No orders in this view"
+            description="Try another filter or place a new order from the menu."
+            icon={<Package className="h-7 w-7" />}
+          />
+          <Link
+            to={ROUTES.PRODUCTS}
+            className="mt-2 inline-block text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
+          >
+            Browse menu →
+          </Link>
+        </div>
+      ) : null}
+
+      {!loading && filteredOrders.length > 0 ? (
+        <div className="space-y-4">
+          <p className="text-sm text-ink-muted">
+            Showing {filteredOrders.length} of {orders.length} orders
+          </p>
+          {filteredOrders.map((order) => (
+            <CustomerOrderCard
+              key={order.id}
+              order={order}
+              layout="wide"
+              expanded={expandedOrderId === order.id}
+              onExpandedChange={(expanded) => setExpandedOrderId(expanded ? order.id : null)}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }

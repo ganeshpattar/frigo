@@ -41,6 +41,7 @@ function mapOrder(row, items = []) {
       id: item.order_item_id,
       productId: item.product_id,
       productName: item.product_name,
+      productImageUrl: item.image_url ?? item.product_image_url ?? null,
       quantity: item.quantity,
       unitPrice: Number(item.unit_price),
       lineTotal: Number(item.line_total),
@@ -83,7 +84,10 @@ export async function listOrders({ page, pageSize, status, userId }) {
   let itemsByOrder = {}
   if (orderIds.length) {
     const items = await query(
-      `SELECT * FROM order_items WHERE order_id = ANY($1)`,
+      `SELECT oi.*, p.image_url
+       FROM order_items oi
+       LEFT JOIN products p ON p.product_id = oi.product_id
+       WHERE oi.order_id = ANY($1)`,
       [orderIds],
     )
     itemsByOrder = items.rows.reduce((acc, item) => {
@@ -104,7 +108,13 @@ export async function listOrders({ page, pageSize, status, userId }) {
 export async function getOrderById(id) {
   const result = await query(`SELECT * FROM orders WHERE order_id = $1`, [id])
   assertFound(result.rows[0], 'Order not found')
-  const items = await query(`SELECT * FROM order_items WHERE order_id = $1`, [id])
+  const items = await query(
+    `SELECT oi.*, p.image_url
+     FROM order_items oi
+     LEFT JOIN products p ON p.product_id = oi.product_id
+     WHERE oi.order_id = $1`,
+    [id],
+  )
   return mapOrder(result.rows[0], items.rows)
 }
 

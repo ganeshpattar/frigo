@@ -1,4 +1,4 @@
-# Frigo Web Application
+# Tirumal Foods Web Application
 
 React + TypeScript + Vite storefront for the Food Ordering Platform.
 

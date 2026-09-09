@@ -62,11 +62,20 @@ export function OrderProgressBar({ status, compact = false }: OrderProgressBarPr
 
       <div className="-mx-1 overflow-x-auto px-1 pb-1 md:overflow-visible md:pb-0">
         <div className="relative flex min-w-[28rem] items-start justify-between md:min-w-0">
-          <div className="absolute left-4 right-4 top-[13px] h-0.5 bg-border md:left-0 md:right-0 md:top-[15px]" aria-hidden />
+          {/* Track runs only between first and last step centers */}
           <div
-            className="absolute left-4 top-[13px] h-0.5 bg-brand-500 transition-all duration-500 md:left-0 md:top-[15px]"
+            className="absolute top-[13px] h-0.5 bg-border md:top-[15px]"
             style={{
-              width: `calc(${currentIndex / (PROGRESS_STEPS.length - 1)} * (100% - 2rem) + 1rem)`,
+              left: `calc(100% / ${PROGRESS_STEPS.length * 2})`,
+              right: `calc(100% / ${PROGRESS_STEPS.length * 2})`,
+            }}
+            aria-hidden
+          />
+          <div
+            className="absolute top-[13px] h-0.5 bg-brand-500 transition-all duration-500 md:top-[15px]"
+            style={{
+              left: `calc(100% / ${PROGRESS_STEPS.length * 2})`,
+              width: `calc(${currentIndex} / ${PROGRESS_STEPS.length} * 100%)`,
             }}
             aria-hidden
           />

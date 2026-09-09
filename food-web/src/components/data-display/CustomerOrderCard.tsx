@@ -13,7 +13,8 @@ import { Button } from '@/components/common/Button'
 import { OrderStatusBadge } from '@/components/data-display/OrderStatusBadge'
 import { OrderProgressBar, getOrderStatusMessage } from '@/components/data-display/OrderProgressBar'
 import { PriceSummaryView } from '@/components/data-display/PriceSummary'
-import { ROUTES } from '@/constants'
+import { ProductImage } from '@/components/data-display/ProductImage'
+import { ROUTES, productPath } from '@/constants'
 import type { Order } from '@/types'
 import { cn } from '@/utils/cn'
 import { formatDateTime, formatInr } from '@/utils/format'
@@ -79,19 +80,19 @@ export function CustomerOrderCard({
     <Card
       padding={false}
       className={cn(
-        'h-full overflow-hidden border-border/80 transition-shadow hover:shadow-md',
-        !isTerminal && 'ring-1 ring-brand-100/60',
+        'h-full overflow-hidden border-border/70 !bg-surface-elevated/80 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md',
+        !isTerminal && 'ring-1 ring-brand-100/50 dark:ring-brand-800/60',
         expanded && 'shadow-md',
       )}
     >
-      <div className="border-b border-border/60 bg-gradient-to-r from-brand-50/80 via-surface-elevated to-surface-elevated px-4 py-4 sm:px-6">
+      <div className="border-b border-border/60 bg-brand-50/40 px-4 py-4 sm:px-6 dark:bg-brand-900/25">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="font-display text-base font-semibold tracking-tight text-ink sm:text-lg">
                 {order.orderNumber}
               </h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-0.5 text-xs font-medium text-ink-muted ring-1 ring-border/60">
+              <span className="inline-flex items-center gap-1 rounded-full bg-surface-elevated/90 px-2.5 py-0.5 text-xs font-medium text-ink-muted ring-1 ring-border/60">
                 <Package className="h-3 w-3" />
                 {totalItems} {totalItems === 1 ? 'item' : 'items'}
               </span>
@@ -126,9 +127,37 @@ export function CustomerOrderCard({
                   key={item.id}
                   className="flex items-center gap-3 rounded-xl bg-canvas/80 px-3 py-2.5 ring-1 ring-border/50"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-100 sm:h-11 sm:w-11">
-                    <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </div>
+                  {item.productId ? (
+                    <Link
+                      to={productPath(item.productId)}
+                      className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-border/70 sm:h-12 sm:w-12"
+                    >
+                      {item.productImageUrl ? (
+                        <ProductImage
+                          src={item.productImageUrl}
+                          alt={item.productName}
+                          aspect="fill"
+                          className="absolute inset-0"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300">
+                          <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+                        </span>
+                      )}
+                    </Link>
+                  ) : (
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-100 sm:h-12 sm:w-12 dark:bg-brand-900/40 dark:text-brand-300">
+                      {item.productImageUrl ? (
+                        <img
+                          src={item.productImageUrl}
+                          alt={item.productName}
+                          className="h-full w-full rounded-lg object-cover"
+                        />
+                      ) : (
+                        <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+                      )}
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-ink">{item.productName}</p>
                     <p className="text-xs text-ink-muted">
