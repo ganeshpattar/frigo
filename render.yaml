@@ -11,6 +11,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
+    preDeployCommand: npm run migrate -w @frigo/auth-service
     startCommand: npm run start -w @frigo/auth-service
     healthCheckPath: /health
     envVars:
@@ -60,6 +61,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
+    preDeployCommand: npm run migrate -w @frigo/user-service
     startCommand: npm run start -w @frigo/user-service
     healthCheckPath: /health
     envVars:
@@ -76,6 +78,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
+    preDeployCommand: npm run migrate -w @frigo/platform-service
     startCommand: npm run start -w @frigo/platform-service
     healthCheckPath: /health
     envVars:
