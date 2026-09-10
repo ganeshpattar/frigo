@@ -11,8 +11,8 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    preDeployCommand: npm run migrate -w @frigo/auth-service
-    startCommand: npm run start -w @frigo/auth-service
+    # Free tier: migrate on start (preDeployCommand is paid-only)
+    startCommand: npm run migrate -w @frigo/auth-service && npm run start -w @frigo/auth-service
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -61,8 +61,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    preDeployCommand: npm run migrate -w @frigo/user-service
-    startCommand: npm run start -w @frigo/user-service
+    startCommand: npm run migrate -w @frigo/user-service && npm run start -w @frigo/user-service
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -78,8 +77,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    preDeployCommand: npm run migrate -w @frigo/platform-service
-    startCommand: npm run start -w @frigo/platform-service
+    startCommand: npm run migrate -w @frigo/platform-service && npm run start -w @frigo/platform-service
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION

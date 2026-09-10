@@ -165,7 +165,7 @@ Restart / redeploy the frontend.
 3. `frigo-platform` (needs auth JWT secret)
 4. `frigo-gateway` (needs all three URLs)
 
-Migrations run automatically via `preDeployCommand` on each DB service.
+Migrations run automatically on each DB service start (`migrate && start`), which works on Render free tier.
 
 ---
 
