@@ -15,8 +15,6 @@ Node.js (ESM JavaScript) microservices aligned with `Food_Microservices_ERD.md`.
 
 ```http
 POST /api/v1/auth/register
-POST /api/v1/auth/verify-email
-POST /api/v1/auth/resend-otp
 POST /api/v1/auth/login
 POST /api/v1/auth/forgot-password
 POST /api/v1/auth/reset-password
@@ -27,7 +25,7 @@ GET  /api/v1/auth/me
 
 ### Example bodies
 
-**Register** (creates unverified user + emails OTP; does not return tokens)
+**Register**
 ```json
 {
   "email": "new@frigo.test",
@@ -38,21 +36,10 @@ GET  /api/v1/auth/me
 }
 ```
 
-**Verify email**
-```json
-{ "email": "new@frigo.test", "code": "123456" }
-```
-
-**Resend OTP**
-```json
-{ "email": "new@frigo.test" }
-```
-
 **Login**
 ```json
 { "email": "customer@frigo.test", "password": "Customer123!" }
 ```
-
 
 **Forgot password**
 ```json

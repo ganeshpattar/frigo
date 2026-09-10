@@ -31,15 +31,6 @@ export const resetPasswordSchema = z.object({
     .regex(/\d/, 'Password must include numbers'),
 })
 
-export const verifyEmailSchema = z.object({
-  email: z.string().email(),
-  code: z.string().trim().min(4).max(12),
-})
-
-export const resendOtpSchema = z.object({
-  email: z.string().email(),
-})
-
 export const refreshSchema = z.object({
   refreshToken: z.string().min(1),
 })

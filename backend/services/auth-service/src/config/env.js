@@ -1,33 +1,10 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import dotenv from 'dotenv'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+import 'dotenv/config'
 
 function required(name) {
   const value = process.env[name]
   if (!value) throw new Error(`Missing env ${name}`)
   return value
 }
-
-function stripQuotes(value) {
-  const v = (value ?? '').trim()
-  if (
-    (v.startsWith('"') && v.endsWith('"')) ||
-    (v.startsWith("'") && v.endsWith("'"))
-  ) {
-    return v.slice(1, -1).trim()
-  }
-  return v
-}
-
-const smtpHost = stripQuotes(process.env.SMTP_HOST)
-const smtpUser = stripQuotes(process.env.SMTP_USER)
-// Gmail app passwords are accepted with or without spaces
-const smtpPass = stripQuotes(process.env.SMTP_PASS).replace(/\s+/g, '')
-const smtpFrom = stripQuotes(process.env.SMTP_FROM) || smtpUser
-const smtpConfigured = Boolean(smtpHost && smtpUser && smtpPass)
 
 export const env = {
   port: Number(process.env.PORT ?? 4001),
@@ -37,15 +14,7 @@ export const env = {
   accessTokenTtlSeconds: Number(process.env.ACCESS_TOKEN_TTL_SECONDS ?? 3600),
   refreshTokenTtlDays: Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? 30),
   resetCodeTtlMinutes: Number(process.env.RESET_CODE_TTL_MINUTES ?? 15),
-  otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES ?? process.env.RESET_CODE_TTL_MINUTES ?? 15),
   userServiceUrl: process.env.USER_SERVICE_URL ?? 'http://localhost:4002',
   bcryptRounds: Number(process.env.BCRYPT_ROUNDS ?? 12),
   exposeDemoResetCode: process.env.EXPOSE_DEMO_RESET_CODE === 'true',
-  smtpHost,
-  smtpPort: Number(process.env.SMTP_PORT ?? 587),
-  smtpSecure: process.env.SMTP_SECURE === 'true',
-  smtpUser,
-  smtpPass,
-  smtpFrom,
-  smtpConfigured,
 }

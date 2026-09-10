@@ -53,8 +53,7 @@ export function normalizeApiError(error: unknown): ApiError {
 
     if (axiosError.code === 'ECONNABORTED') {
       return new ApiError({
-        message:
-          'The server took too long to respond (Render free services wake from sleep). Wait a few seconds and try again.',
+        message: 'The request timed out. Please try again.',
         status: 0,
         isTimeout: true,
       })

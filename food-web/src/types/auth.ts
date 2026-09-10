@@ -31,22 +31,6 @@ export interface RegisterRequest {
   phone?: string
 }
 
-export interface RegisterPendingResponse {
-  message: string
-  email: string
-  /** Present in mock/dev only so the verify flow can be tested without email */
-  demoCode?: string
-}
-
-export interface VerifyEmailRequest {
-  email: string
-  code: string
-}
-
-export interface ResendOtpRequest {
-  email: string
-}
-
 export interface ForgotPasswordRequest {
   email: string
 }

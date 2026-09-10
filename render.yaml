@@ -11,8 +11,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    # Free tier: migrate on start (preDeployCommand is paid-only)
-    startCommand: npm run migrate -w @frigo/auth-service && npm run start -w @frigo/auth-service
+    startCommand: npm run start -w @frigo/auth-service
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -32,27 +31,6 @@ services:
         value: "false"
       - key: BCRYPT_ROUNDS
         value: "12"
-      - key: OTP_TTL_MINUTES
-        value: "15"
-      - key: RESET_CODE_TTL_MINUTES
-        value: "15"
-      - key: ACCESS_TOKEN_TTL_SECONDS
-        value: "3600"
-      - key: REFRESH_TOKEN_TTL_DAYS
-        value: "30"
-      - key: SMTP_HOST
-        value: "smtp.gmail.com"
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_SECURE
-        value: "false"
-      - key: SMTP_USER
-        value: "vpganesh45@gmail.com"
-      # Prefer moving this to Render Dashboard secret after first successful send, then rotate App Password
-      - key: SMTP_PASS
-        value: "tydymoljdncaypyx"
-      - key: SMTP_FROM
-        value: "Tirumala Foods <vpganesh45@gmail.com>"
 
   # ── User service ──────────────────────────────────────────────────
   - type: web
@@ -62,7 +40,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    startCommand: npm run migrate -w @frigo/user-service && npm run start -w @frigo/user-service
+    startCommand: npm run start -w @frigo/user-service
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
@@ -78,7 +56,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    startCommand: npm run migrate -w @frigo/platform-service && npm run start -w @frigo/platform-service
+    startCommand: npm run start -w @frigo/platform-service
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION

@@ -80,21 +80,6 @@ Do **not** include `channel_binding=require` — Node `pg` works better without 
 Render auto-generates `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` from the blueprint.  
 `USER_SERVICE_URL` is wired automatically from `frigo-user`.
 
-Also set these **SMTP** values (required for signup OTP email):
-
-| Key | Value |
-|-----|--------|
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` (set by blueprint) |
-| `SMTP_SECURE` | `false` (set by blueprint) |
-| `SMTP_USER` | Your Gmail address |
-| `SMTP_PASS` | Gmail App Password |
-| `SMTP_FROM` | `Tirumala Foods <support@tirumalafoods.com>` (set by blueprint) |
-
-`EXPOSE_DEMO_RESET_CODE` is `false` in production (OTP only via email).
-
-For `support@tirumalafoods.com` as From, add that address under Gmail **Settings → Accounts → Send mail as**.
-
 ### `frigo-platform` only
 
 `JWT_ACCESS_SECRET` is copied from `frigo-auth` automatically.
@@ -165,7 +150,7 @@ Restart / redeploy the frontend.
 3. `frigo-platform` (needs auth JWT secret)
 4. `frigo-gateway` (needs all three URLs)
 
-Migrations run automatically on each DB service start (`migrate && start`), which works on Render free tier.
+Migrations run automatically via `preDeployCommand` on each DB service.
 
 ---
 
@@ -185,8 +170,6 @@ Migrations run automatically on each DB service start (`migrate && start`), whic
 | `Missing env DATABASE_URL` | Add Neon URL to auth, user, and platform services |
 | 502 from gateway | Check auth/user/platform are **Live**; open their logs |
 | Register/login 500 | Run seeds; check Neon migrations completed in deploy logs |
-| OTP email not sending | Set `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` on **frigo-auth**; confirm App Password |
-| From shows Gmail not support@ | Add `support@tirumalafoods.com` in Gmail “Send mail as” |
 | CORS errors from Vercel | Gateway already allows all origins; redeploy gateway if needed |
 
 ---
