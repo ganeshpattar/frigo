@@ -14,7 +14,11 @@ app.use(express.json({ limit: '1mb' }))
 
 app.get('/health', async (_req, res) => {
   await query('SELECT 1')
-  res.json({ status: 'ok', service: 'auth-service' })
+  res.json({
+    status: 'ok',
+    service: 'auth-service',
+    smtpConfigured: env.smtpConfigured,
+  })
 })
 
 app.use('/auth', authRouter)
