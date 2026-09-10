@@ -8,8 +8,10 @@ import {
   logout,
   refreshSession,
   registerUser,
+  resendSignupOtp,
   resetPassword,
   setUserActive,
+  verifyEmail,
 } from '../services/authService.js'
 import {
   getRoleById,
@@ -23,7 +25,9 @@ import {
   loginSchema,
   refreshSchema,
   registerSchema,
+  resendOtpSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
 } from '../utils/validation.js'
 
 const listUsersQuerySchema = z.object({
@@ -43,8 +47,28 @@ function ipHash(req) {
 export async function register(req, res, next) {
   try {
     const body = registerSchema.parse(req.body)
-    const result = await registerUser(body)
+    const result = await registerUser(body, ipHash(req))
     res.status(201).json(result)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function verifyEmailHandler(req, res, next) {
+  try {
+    const body = verifyEmailSchema.parse(req.body)
+    const result = await verifyEmail(body)
+    res.json(result)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function resendOtpHandler(req, res, next) {
+  try {
+    const body = resendOtpSchema.parse(req.body)
+    const result = await resendSignupOtp(body.email, ipHash(req))
+    res.json(result)
   } catch (err) {
     next(err)
   }

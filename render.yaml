@@ -31,6 +31,26 @@ services:
         value: "false"
       - key: BCRYPT_ROUNDS
         value: "12"
+      - key: OTP_TTL_MINUTES
+        value: "15"
+      - key: RESET_CODE_TTL_MINUTES
+        value: "15"
+      - key: ACCESS_TOKEN_TTL_SECONDS
+        value: "3600"
+      - key: REFRESH_TOKEN_TTL_DAYS
+        value: "30"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        value: "Tirumala Foods <support@tirumalafoods.com>"
 
   # ── User service ──────────────────────────────────────────────────
   - type: web

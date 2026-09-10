@@ -1,6 +1,9 @@
 import type {
   LoginRequest,
   RegisterRequest,
+  RegisterPendingResponse,
+  VerifyEmailRequest,
+  ResendOtpRequest,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   ResetPasswordRequest,
@@ -36,6 +39,11 @@ function mockTokens(userId: string): AuthTokens {
 
 /** In-memory reset codes for mock mode */
 const mockResetCodes = new Map<string, { code: string; expiresAt: number }>()
+/** In-memory signup OTP codes for mock mode */
+const mockSignupOtps = new Map<
+  string,
+  { code: string; expiresAt: number; payload: RegisterRequest; userId: string }
+>()
 
 export const authApi = {
   async login(payload: LoginRequest): Promise<{ user: AuthUser; tokens: AuthTokens }> {
@@ -58,22 +66,26 @@ export const authApi = {
     return data
   },
 
-  async register(payload: RegisterRequest): Promise<{ user: AuthUser; tokens: AuthTokens }> {
+  async register(payload: RegisterRequest): Promise<RegisterPendingResponse> {
     if (appConfig.useAuthMocks) {
       await delay(500)
-      if (MOCK_USERS[payload.email.toLowerCase()]) {
+      const email = payload.email.trim().toLowerCase()
+      if (MOCK_USERS[email]) {
         throw new ApiError({ message: 'An account with this email already exists.', status: 409 })
       }
-      const user: AuthUser = {
-        id: `user_${crypto.randomUUID()}`,
-        email: payload.email,
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        roles: ['CUSTOMER'],
-        permissions: [],
-        status: 'ACTIVE',
+      const code = '123456'
+      const userId = `user_${crypto.randomUUID()}`
+      mockSignupOtps.set(email, {
+        code,
+        expiresAt: Date.now() + 15 * 60 * 1000,
+        payload: { ...payload, email },
+        userId,
+      })
+      return {
+        message: 'We sent a verification code to your email.',
+        email,
+        demoCode: code,
       }
-      return { user, tokens: mockTokens(user.id) }
     }
 
     const body = {
@@ -84,10 +96,65 @@ export const authApi = {
       ...(payload.phone?.trim() ? { phone: payload.phone.trim() } : {}),
     }
 
+    const { data } = await apiClient.post<RegisterPendingResponse>('/auth/register', body)
+    return data
+  },
+
+  async verifyEmail(payload: VerifyEmailRequest): Promise<{ user: AuthUser; tokens: AuthTokens }> {
+    if (appConfig.useAuthMocks) {
+      await delay(400)
+      const email = payload.email.trim().toLowerCase()
+      const pending = mockSignupOtps.get(email)
+      if (!pending || pending.code !== payload.code.trim() || pending.expiresAt < Date.now()) {
+        throw new ApiError({
+          message: 'Invalid or expired verification code. Request a new one.',
+          status: 400,
+        })
+      }
+      const user: AuthUser = {
+        id: pending.userId,
+        email,
+        firstName: pending.payload.firstName,
+        lastName: pending.payload.lastName,
+        roles: ['CUSTOMER'],
+        permissions: [],
+        status: 'ACTIVE',
+      }
+      MOCK_USERS[email] = { ...user, password: pending.payload.password }
+      mockSignupOtps.delete(email)
+      return { user, tokens: mockTokens(user.id) }
+    }
+
     const { data } = await apiClient.post<{ user: AuthUser; tokens: AuthTokens }>(
-      '/auth/register',
-      body,
+      '/auth/verify-email',
+      {
+        email: payload.email.trim(),
+        code: payload.code.trim(),
+      },
     )
+    return data
+  },
+
+  async resendSignupOtp(payload: ResendOtpRequest): Promise<RegisterPendingResponse> {
+    if (appConfig.useAuthMocks) {
+      await delay(300)
+      const email = payload.email.trim().toLowerCase()
+      const pending = mockSignupOtps.get(email)
+      if (!pending) {
+        throw new ApiError({ message: 'No pending signup found for that email.', status: 404 })
+      }
+      const code = '123456'
+      mockSignupOtps.set(email, { ...pending, code, expiresAt: Date.now() + 15 * 60 * 1000 })
+      return {
+        message: 'We sent a verification code to your email.',
+        email,
+        demoCode: code,
+      }
+    }
+
+    const { data } = await apiClient.post<RegisterPendingResponse>('/auth/resend-otp', {
+      email: payload.email.trim(),
+    })
     return data
   },
 

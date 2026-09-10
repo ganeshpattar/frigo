@@ -7,7 +7,15 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { AuthUser, LoginRequest, RegisterRequest, RoleCode, PermissionCode } from '@/types'
+import type {
+  AuthUser,
+  LoginRequest,
+  RegisterRequest,
+  RegisterPendingResponse,
+  RoleCode,
+  PermissionCode,
+  AuthTokens,
+} from '@/types'
 import { authApi, registerAuthHandlers } from '@/services/api'
 import { tokenStorage, storage } from '@/services/storage'
 import { hasPermission, hasRole, hasAnyPermission, hasAllPermissions } from '@/utils/rbac'
@@ -22,7 +30,9 @@ interface AuthContextValue {
   roles: RoleCode[]
   permissions: PermissionCode[]
   login: (payload: LoginRequest) => Promise<void>
-  register: (payload: RegisterRequest) => Promise<void>
+  /** Completes session after email OTP verification */
+  establishSession: (user: AuthUser, tokens: AuthTokens) => void
+  register: (payload: RegisterRequest) => Promise<RegisterPendingResponse>
   logout: () => Promise<void>
   refreshSession: () => Promise<string | null>
   hasRole: (role: RoleCode) => boolean
@@ -98,11 +108,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(nextUser)
   }, [])
 
-  const register = useCallback(async (payload: RegisterRequest) => {
-    const { user: nextUser, tokens } = await authApi.register(payload)
+  const establishSession = useCallback((nextUser: AuthUser, tokens: AuthTokens) => {
     tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresAt)
     storage.setJson(USER_SNAPSHOT_KEY, nextUser)
     setUser(nextUser)
+  }, [])
+
+  const register = useCallback(async (payload: RegisterRequest) => {
+    return authApi.register(payload)
   }, [])
 
   const logout = useCallback(async () => {
@@ -123,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roles: user?.roles ?? [],
       permissions: user?.permissions ?? [],
       login,
+      establishSession,
       register,
       logout,
       refreshSession,
@@ -131,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hasAnyPermission: (permissions) => hasAnyPermission(user, permissions),
       hasAllPermissions: (permissions) => hasAllPermissions(user, permissions),
     }),
-    [user, isLoading, login, register, logout, refreshSession],
+    [user, isLoading, login, establishSession, register, logout, refreshSession],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

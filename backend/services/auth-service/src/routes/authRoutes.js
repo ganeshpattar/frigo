@@ -13,7 +13,9 @@ import {
   me,
   refresh,
   register,
+  resendOtpHandler,
   reset,
+  verifyEmailHandler,
 } from '../controllers/authController.js'
 import { requireAuth } from '../middleware/auth.js'
 import { loadPermissions, requirePermission } from '../middleware/permissions.js'
@@ -21,6 +23,8 @@ import { loadPermissions, requirePermission } from '../middleware/permissions.js
 export const authRouter = Router()
 
 authRouter.post('/register', register)
+authRouter.post('/verify-email', verifyEmailHandler)
+authRouter.post('/resend-otp', resendOtpHandler)
 authRouter.post('/login', login)
 authRouter.post('/forgot-password', forgot)
 authRouter.post('/reset-password', reset)

@@ -24,4 +24,9 @@ app.use(errorHandler)
 await ensureDb()
 app.listen(env.port, () => {
   console.log(`Auth service listening on :${env.port}`)
+  console.log(
+    env.smtpConfigured
+      ? `[auth] SMTP enabled via ${env.smtpHost} as ${env.smtpUser}`
+      : '[auth] SMTP not configured — OTP emails will not be sent',
+  )
 })

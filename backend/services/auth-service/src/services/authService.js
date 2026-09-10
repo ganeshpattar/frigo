@@ -10,7 +10,54 @@ import {
   verifyPassword,
 } from '../utils/crypto.js'
 import { AppError } from '../utils/errors.js'
+import { isMailConfigured, sendOtpEmail } from '../utils/mailer.js'
 import { createCustomerProfile, getCustomerProfile } from './userClient.js'
+
+async function issueAndSendEmailOtp(userId, email, ipHash) {
+  const code = generateResetCode()
+  const expires = new Date(Date.now() + env.otpTtlMinutes * 60 * 1000)
+
+  await query(
+    `UPDATE email_verification_tokens
+     SET consumed_at_utc = NOW()
+     WHERE user_id = $1 AND consumed_at_utc IS NULL`,
+    [userId],
+  )
+
+  await query(
+    `INSERT INTO email_verification_tokens (
+      verification_token_id, user_id, code_hash, expires_at_utc, request_ip_hash
+    ) VALUES ($1, $2, $3, $4, $5)`,
+    [newId(), userId, sha256(code), expires.toISOString(), ipHash ?? null],
+  )
+
+  let mailSent = false
+  try {
+    const result = await sendOtpEmail({ to: email, code, purpose: 'verification' })
+    mailSent = Boolean(result.sent)
+    if (!mailSent) {
+      console.error('[auth] verification OTP not sent:', result.reason ?? 'unknown')
+    }
+  } catch (err) {
+    console.error('[auth] failed to send verification OTP email:', err.message)
+    if (err.response) console.error('[auth] SMTP response:', err.response)
+  }
+
+  if (!mailSent && !env.exposeDemoResetCode) {
+    throw new AppError(
+      'Could not send verification email. Configure SMTP or enable EXPOSE_DEMO_RESET_CODE for local testing.',
+      503,
+    )
+  }
+
+  return {
+    message: mailSent
+      ? 'We sent a verification code to your email.'
+      : 'Account created. Use the demo verification code (SMTP is not configured).',
+    email,
+    ...(env.exposeDemoResetCode || !mailSent ? { demoCode: code } : {}),
+  }
+}
 
 async function getRolesAndPermissions(userId) {
   const rolesResult = await query(
@@ -90,40 +137,126 @@ async function assignRole(userId, roleCode) {
   )
 }
 
-export async function registerUser(input) {
+export async function registerUser(input, ipHash) {
   const email = input.email.trim().toLowerCase()
-  const existing = await query(`SELECT user_id FROM users WHERE email = $1`, [email])
-  if (existing.rows[0]) {
+  const existing = await query(`SELECT * FROM users WHERE email = $1`, [email])
+  const existingUser = existing.rows[0]
+
+  if (existingUser?.email_verified_at_utc) {
     throw new AppError('An account with this email already exists.', 409)
   }
 
   const passwordHash = await hashPassword(input.password)
-  const userId = newId()
+  let userId = existingUser?.user_id
+
+  if (existingUser) {
+    await query(
+      `UPDATE users
+       SET password_hash = $2,
+           user_status = 'ACTIVE',
+           account_status = 'ACTIVE',
+           failed_login_count = 0,
+           locked_until_utc = NULL,
+           updated_at_utc = NOW()
+       WHERE user_id = $1`,
+      [userId, passwordHash],
+    )
+    await createCustomerProfile({
+      userId,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      phone: input.phone,
+    })
+  } else {
+    userId = newId()
+    await query(
+      `INSERT INTO users (user_id, email, password_hash, user_status, account_status)
+       VALUES ($1, $2, $3, 'ACTIVE', 'ACTIVE')`,
+      [userId, email, passwordHash],
+    )
+    await assignRole(userId, 'CUSTOMER')
+    await createCustomerProfile({
+      userId,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      phone: input.phone,
+    })
+    await query(
+      `INSERT INTO auth_outbox (event_id, event_type, aggregate_type, aggregate_id, payload_json)
+       VALUES ($1, 'UserRegistered', 'User', $2, $3)`,
+      [newId(), userId, JSON.stringify({ userId, email })],
+    )
+  }
+
+  return issueAndSendEmailOtp(userId, email, ipHash)
+}
+
+export async function verifyEmail(input) {
+  const email = input.email.trim().toLowerCase()
+  const code = input.code.trim()
+  const userResult = await query(`SELECT * FROM users WHERE email = $1`, [email])
+  const user = userResult.rows[0]
+  if (!user || user.user_status === 'DELETED') {
+    throw new AppError('Invalid or expired verification code. Request a new one.', 400)
+  }
+
+  if (user.email_verified_at_utc) {
+    const authUser = await toAuthUser(user)
+    const tokens = await issueTokens(user.user_id, user.email)
+    return { user: authUser, tokens }
+  }
+
+  const tokenResult = await query(
+    `SELECT verification_token_id, code_hash, expires_at_utc
+     FROM email_verification_tokens
+     WHERE user_id = $1 AND consumed_at_utc IS NULL
+     ORDER BY created_at_utc DESC
+     LIMIT 1`,
+    [user.user_id],
+  )
+  const token = tokenResult.rows[0]
+  if (!token || token.expires_at_utc < new Date() || token.code_hash !== sha256(code)) {
+    throw new AppError('Invalid or expired verification code. Request a new one.', 400)
+  }
 
   await query(
-    `INSERT INTO users (user_id, email, password_hash, user_status, account_status)
-     VALUES ($1, $2, $3, 'ACTIVE', 'ACTIVE')`,
-    [userId, email, passwordHash],
+    `UPDATE users
+     SET email_verified_at_utc = NOW(),
+         updated_at_utc = NOW()
+     WHERE user_id = $1`,
+    [user.user_id],
   )
-  await assignRole(userId, 'CUSTOMER')
-
-  await createCustomerProfile({
-    userId,
-    firstName: input.firstName,
-    lastName: input.lastName,
-    phone: input.phone,
-  })
-
+  await query(
+    `UPDATE email_verification_tokens
+     SET consumed_at_utc = NOW()
+     WHERE verification_token_id = $1`,
+    [token.verification_token_id],
+  )
   await query(
     `INSERT INTO auth_outbox (event_id, event_type, aggregate_type, aggregate_id, payload_json)
-     VALUES ($1, 'UserRegistered', 'User', $2, $3)`,
-    [newId(), userId, JSON.stringify({ userId, email })],
+     VALUES ($1, 'EmailVerified', 'User', $2, $3)`,
+    [newId(), user.user_id, JSON.stringify({ userId: user.user_id, email })],
   )
 
-  const userRow = await query(`SELECT * FROM users WHERE user_id = $1`, [userId])
-  const user = await toAuthUser(userRow.rows[0])
-  const tokens = await issueTokens(userId, email)
-  return { user, tokens }
+  const verified = await query(`SELECT * FROM users WHERE user_id = $1`, [user.user_id])
+  const authUser = await toAuthUser(verified.rows[0])
+  const tokens = await issueTokens(user.user_id, user.email)
+  return { user: authUser, tokens }
+}
+
+export async function resendSignupOtp(emailRaw, ipHash) {
+  const email = emailRaw.trim().toLowerCase()
+  const result = await query(`SELECT * FROM users WHERE email = $1`, [email])
+  const user = result.rows[0]
+
+  if (!user || user.user_status === 'DELETED') {
+    throw new AppError('No pending signup found for that email.', 404)
+  }
+  if (user.email_verified_at_utc) {
+    throw new AppError('This email is already verified. You can sign in.', 400)
+  }
+
+  return issueAndSendEmailOtp(user.user_id, email, ipHash)
 }
 
 export async function loginUser(input) {
@@ -141,6 +274,9 @@ export async function loginUser(input) {
   }
   if (user.account_status === 'LOCKED' || (user.locked_until_utc && user.locked_until_utc > new Date())) {
     throw new AppError('This account is temporarily locked. Try again later.', 403)
+  }
+  if (!user.email_verified_at_utc) {
+    throw new AppError('Please verify your email before signing in.', 403, 'EMAIL_NOT_VERIFIED')
   }
 
   const valid = await verifyPassword(input.password, user.password_hash)
@@ -205,16 +341,24 @@ export async function forgotPassword(emailRaw, ipHash) {
     [newId(), user.user_id, sha256(code), expires.toISOString(), ipHash ?? null],
   )
 
-  // Production: publish notification event / email here.
   await query(
     `INSERT INTO auth_outbox (event_id, event_type, aggregate_type, aggregate_id, payload_json)
      VALUES ($1, 'PasswordResetRequested', 'User', $2, $3)`,
     [newId(), user.user_id, JSON.stringify({ userId: user.user_id, email })],
   )
 
+  let mailSent = false
+  try {
+    const result = await sendOtpEmail({ to: email, code, purpose: 'password_reset' })
+    mailSent = Boolean(result.sent)
+  } catch (err) {
+    console.error('[auth] failed to send password reset email:', err.message)
+  }
+
+  const exposeDemo = env.exposeDemoResetCode || !isMailConfigured()
   return {
     message,
-    ...(env.exposeDemoResetCode ? { demoCode: code } : {}),
+    ...(exposeDemo ? { demoCode: code } : {}),
   }
 }
 
