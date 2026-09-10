@@ -32,21 +32,32 @@ async function issueAndSendEmailOtp(userId, email, ipHash) {
   )
 
   let mailSent = false
+  let mailFailure = null
   try {
     const result = await sendOtpEmail({ to: email, code, purpose: 'verification' })
     mailSent = Boolean(result.sent)
     if (!mailSent) {
-      console.error('[auth] verification OTP not sent:', result.reason ?? 'unknown')
+      mailFailure = result
+      console.error('[auth] verification OTP not sent:', result.reason, result.detail ?? '')
     }
   } catch (err) {
+    mailFailure = { reason: 'smtp_send_failed', detail: err.message }
     console.error('[auth] failed to send verification OTP email:', err.message)
     if (err.response) console.error('[auth] SMTP response:', err.response)
   }
 
   if (!mailSent && !env.exposeDemoResetCode) {
+    if (mailFailure?.reason === 'smtp_not_configured') {
+      throw new AppError(
+        'Email is not configured on the server. Set SMTP_HOST, SMTP_USER, and SMTP_PASS on frigo-auth in Render.',
+        503,
+        'SMTP_NOT_CONFIGURED',
+      )
+    }
     throw new AppError(
-      'Could not send verification email. Configure SMTP or enable EXPOSE_DEMO_RESET_CODE for local testing.',
+      `Could not send verification email${mailFailure?.detail ? `: ${mailFailure.detail}` : '.'}`,
       503,
+      'SMTP_SEND_FAILED',
     )
   }
 

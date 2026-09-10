@@ -51,7 +51,7 @@ services:
       - key: SMTP_PASS
         sync: false
       - key: SMTP_FROM
-        value: "Tirumala Foods <support@tirumalafoods.com>"
+        value: "Tirumala Foods <vpganesh45@gmail.com>"
 
   # ── User service ──────────────────────────────────────────────────
   - type: web

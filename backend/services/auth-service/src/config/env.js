@@ -11,11 +11,22 @@ function required(name) {
   return value
 }
 
-const smtpHost = process.env.SMTP_HOST?.trim() || ''
-const smtpUser = process.env.SMTP_USER?.trim() || ''
+function stripQuotes(value) {
+  const v = (value ?? '').trim()
+  if (
+    (v.startsWith('"') && v.endsWith('"')) ||
+    (v.startsWith("'") && v.endsWith("'"))
+  ) {
+    return v.slice(1, -1).trim()
+  }
+  return v
+}
+
+const smtpHost = stripQuotes(process.env.SMTP_HOST)
+const smtpUser = stripQuotes(process.env.SMTP_USER)
 // Gmail app passwords are accepted with or without spaces
-const smtpPass = (process.env.SMTP_PASS ?? '').replace(/\s+/g, '').trim()
-const smtpFrom = process.env.SMTP_FROM?.trim() || smtpUser
+const smtpPass = stripQuotes(process.env.SMTP_PASS).replace(/\s+/g, '')
+const smtpFrom = stripQuotes(process.env.SMTP_FROM) || smtpUser
 const smtpConfigured = Boolean(smtpHost && smtpUser && smtpPass)
 
 export const env = {

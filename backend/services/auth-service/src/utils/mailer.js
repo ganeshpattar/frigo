@@ -23,6 +23,21 @@ export function isMailConfigured() {
   return env.smtpConfigured
 }
 
+/** Gmail only allows From = authenticated user (or verified Send mail as). */
+function resolveFromAddress() {
+  const configured = env.smtpFrom || ''
+  const user = env.smtpUser
+  if (!configured) return user
+  // If From uses a different mailbox than SMTP_USER, Gmail rejects it.
+  const emailMatch = configured.match(/<([^>]+)>/)
+  const fromEmail = (emailMatch ? emailMatch[1] : configured).trim().toLowerCase()
+  if (fromEmail === user.toLowerCase()) return configured
+  // Keep brand display name, send via authenticated Gmail
+  const nameMatch = configured.match(/^"?([^"<]+)"?\s*</)
+  const displayName = nameMatch?.[1]?.trim() || 'Tirumala Foods'
+  return `"${displayName}" <${user}>`
+}
+
 function buildOtpEmail({ code, purpose }) {
   const isReset = purpose === 'password_reset'
   const subject = isReset
@@ -111,16 +126,26 @@ export async function sendOtpEmail({ to, code, purpose = 'verification' }) {
   }
 
   const { subject, text, html } = buildOtpEmail({ code, purpose })
+  const from = resolveFromAddress()
 
-  await transport.sendMail({
-    from: env.smtpFrom,
-    to,
-    subject,
-    text,
-    html,
-    replyTo: 'support@tirumalafoods.com',
-  })
+  try {
+    await transport.sendMail({
+      from,
+      to,
+      subject,
+      text,
+      html,
+      replyTo: 'support@tirumalafoods.com',
+    })
+  } catch (err) {
+    console.error('[mailer] sendMail failed:', err.message)
+    return {
+      sent: false,
+      reason: 'smtp_send_failed',
+      detail: err.message,
+    }
+  }
 
-  console.log(`[mailer] OTP email sent to ${to}`)
+  console.log(`[mailer] OTP email sent to ${to} from ${from}`)
   return { sent: true }
 }
