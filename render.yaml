@@ -46,11 +46,11 @@ services:
         value: "587"
       - key: SMTP_SECURE
         value: "false"
-      # Set this once in Render Dashboard → frigo-auth → Environment (do not commit the password)
       - key: SMTP_USER
         value: "vpganesh45@gmail.com"
+      # Prefer moving this to Render Dashboard secret after first successful send, then rotate App Password
       - key: SMTP_PASS
-        sync: false
+        value: "tydymoljdncaypyx"
       - key: SMTP_FROM
         value: "Tirumala Foods <vpganesh45@gmail.com>"
 
