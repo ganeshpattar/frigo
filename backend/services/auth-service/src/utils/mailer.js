@@ -10,6 +10,8 @@ function getTransporter() {
       host: env.smtpHost,
       port: env.smtpPort,
       secure: env.smtpSecure,
+      // Render (and many hosts) have no IPv6 route — force IPv4 to avoid ENETUNREACH
+      family: 4,
       auth: {
         user: env.smtpUser,
         pass: env.smtpPass,

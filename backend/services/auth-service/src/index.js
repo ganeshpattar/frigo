@@ -1,10 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import dns from 'node:dns'
 import { env } from './config/env.js'
 import { authRouter } from './routes/authRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { ensureDb, query } from './db/pool.js'
+
+// Prefer IPv4 — Render free tier often cannot reach Gmail SMTP over IPv6
+dns.setDefaultResultOrder('ipv4first')
 
 const app = express()
 
