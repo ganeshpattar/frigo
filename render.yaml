@@ -46,8 +46,9 @@ services:
         value: "587"
       - key: SMTP_SECURE
         value: "false"
+      # Set this once in Render Dashboard → frigo-auth → Environment (do not commit the password)
       - key: SMTP_USER
-        sync: false
+        value: "vpganesh45@gmail.com"
       - key: SMTP_PASS
         sync: false
       - key: SMTP_FROM
